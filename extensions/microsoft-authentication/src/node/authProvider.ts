@@ -109,8 +109,8 @@ export class MsalAuthProvider implements AuthenticationProvider {
 			clientTenantMap.get(key)!.refreshTokens.push(session.refreshToken);
 		}
 
-		for (const { clientId, tenant, refreshTokens } of clientTenantMap.values()) {
-			await this.getOrCreatePublicClientApplication(clientId, tenant, refreshTokens);
+		for (const { clientId, refreshTokens } of clientTenantMap.values()) {
+			await this._publicClientManager.getOrCreate(clientId, refreshTokens);
 		}
 	}
 
@@ -173,8 +173,8 @@ export class MsalAuthProvider implements AuthenticationProvider {
 			return allSessions;
 		}
 
-		const cachedPca = await this.getOrCreatePublicClientApplication(scopeData.clientId, scopeData.tenant);
-		const sessions = await this.getAllSessionsForPca(cachedPca, scopeData.originalScopes, scopeData.scopesToSend, options?.account);
+		const cachedPca = await this._publicClientManager.getOrCreate(scopeData.clientId);
+		const sessions = await this.getAllSessionsForPca(cachedPca, scopeData, options?.account);
 		this._logger.info(`[getSessions] [${scopeData.scopeStr}] returned ${sessions.length} session(s)`);
 		return sessions;
 
@@ -185,7 +185,7 @@ export class MsalAuthProvider implements AuthenticationProvider {
 		// Do NOT use `scopes` beyond this place in the code. Use `scopeData` instead.
 
 		this._logger.info('[createSession]', `[${scopeData.scopeStr}]`, 'starting');
-		const cachedPca = await this.getOrCreatePublicClientApplication(scopeData.clientId, scopeData.tenant);
+		const cachedPca = await this._publicClientManager.getOrCreate(scopeData.clientId);
 
 		// Used for showing a friendlier message to the user when the explicitly cancel a flow.
 		let userCancelled: boolean | undefined;
@@ -221,8 +221,10 @@ export class MsalAuthProvider implements AuthenticationProvider {
 				}
 			}
 			try {
+				const authority = new URL(scopeData.tenant, this._env.activeDirectoryEndpointUrl).toString();
 				const result = await flow.trigger({
 					cachedPca,
+					authority,
 					scopes: scopeData.scopesToSend,
 					loginHint: options.account?.label,
 					windowHandle: window.nativeHandle ? Buffer.from(window.nativeHandle) : undefined,
@@ -260,7 +262,7 @@ export class MsalAuthProvider implements AuthenticationProvider {
 				if (account.homeAccountId === sessionId) {
 					this._telemetryReporter.sendLogoutEvent();
 					promises.push(cachedPca.removeAccount(account));
-					this._logger.info(`[removeSession] [${sessionId}] [${cachedPca.clientId}] [${cachedPca.authority}] removing session...`);
+					this._logger.info(`[removeSession] [${sessionId}] [${cachedPca.clientId}] removing session...`);
 				}
 			}
 		}
@@ -281,15 +283,9 @@ export class MsalAuthProvider implements AuthenticationProvider {
 
 	//#endregion
 
-	private async getOrCreatePublicClientApplication(clientId: string, tenant: string, refreshTokensToMigrate?: string[]): Promise<ICachedPublicClientApplication> {
-		const authority = new URL(tenant, this._env.activeDirectoryEndpointUrl).toString();
-		return await this._publicClientManager.getOrCreate(clientId, authority, refreshTokensToMigrate);
-	}
-
 	private async getAllSessionsForPca(
 		cachedPca: ICachedPublicClientApplication,
-		originalScopes: readonly string[],
-		scopesToSend: string[],
+		scopeData: ScopeData,
 		accountFilter?: AuthenticationSessionAccountInformation
 	): Promise<AuthenticationSession[]> {
 		const accounts = accountFilter
@@ -299,8 +295,9 @@ export class MsalAuthProvider implements AuthenticationProvider {
 		return this._eventBufferer.bufferEventsAsync(async () => {
 			for (const account of accounts) {
 				try {
-					const result = await cachedPca.acquireTokenSilent({ account, scopes: scopesToSend, redirectUri });
-					sessions.push(this.sessionFromAuthenticationResult(result, originalScopes));
+					const authority = new URL(scopeData.tenant, this._env.activeDirectoryEndpointUrl).toString();
+					const result = await cachedPca.acquireTokenSilent({ account, authority, scopes: scopeData.scopesToSend, redirectUri });
+					sessions.push(this.sessionFromAuthenticationResult(result, scopeData.originalScopes));
 				} catch (e) {
 					// If we can't get a token silently, the account is probably in a bad state so we should skip it
 					// MSAL will log this already, so we don't need to log it again

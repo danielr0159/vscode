@@ -14,11 +14,10 @@ export interface ICachedPublicClientApplication extends Disposable {
 	removeAccount(account: AccountInfo): Promise<void>;
 	accounts: AccountInfo[];
 	clientId: string;
-	authority: string;
 }
 
 export interface ICachedPublicClientApplicationManager {
 	onDidAccountsChange: Event<{ added: AccountInfo[]; changed: AccountInfo[]; deleted: AccountInfo[] }>;
-	getOrCreate(clientId: string, authority: string): Promise<ICachedPublicClientApplication>;
+	getOrCreate(clientId: string, refreshTokensToMigrate?: string[]): Promise<ICachedPublicClientApplication>;
 	getAll(): ICachedPublicClientApplication[];
 }

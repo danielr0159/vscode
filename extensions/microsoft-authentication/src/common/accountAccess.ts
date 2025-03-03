@@ -22,11 +22,9 @@ export class ScopedAccountAccess implements IAccountAccess {
 
 	constructor(
 		private readonly _secretStorage: SecretStorage,
-		private readonly _cloudName: string,
-		private readonly _clientId: string,
-		private readonly _authority: string
+		private readonly _cloudName: string
 	) {
-		this._accountAccessSecretStorage = new AccountAccessSecretStorage(this._secretStorage, this._cloudName, this._clientId, this._authority);
+		this._accountAccessSecretStorage = new AccountAccessSecretStorage(this._secretStorage, this._cloudName);
 		this._accountAccessSecretStorage.onDidChange(() => this.update());
 	}
 
@@ -74,20 +72,16 @@ export class AccountAccessSecretStorage {
 	private readonly _onDidChangeEmitter = new EventEmitter<void>;
 	readonly onDidChange: Event<void> = this._onDidChangeEmitter.event;
 
-	// TODO@TylerLeonhardt: Remove legacy key in next version
-	private readonly _legacyKey = `accounts-${this._cloudName}-${this._clientId}-${this._authority}`;
 	private readonly _key = `accounts-${this._cloudName}`;
 
 	constructor(
 		private readonly _secretStorage: SecretStorage,
-		private readonly _cloudName: string,
-		private readonly _clientId: string,
-		private readonly _authority: string
+		private readonly _cloudName: string
 	) {
 		this._disposable = Disposable.from(
 			this._onDidChangeEmitter,
 			this._secretStorage.onDidChange(e => {
-				if (e.key === this._key || e.key === this._legacyKey) {
+				if (e.key === this._key) {
 					this._onDidChangeEmitter.fire();
 				}
 			})
@@ -99,32 +93,15 @@ export class AccountAccessSecretStorage {
 		if (value) {
 			return JSON.parse(value);
 		}
-		// TODO@TylerLeonhardt: Remove legacy fallback in next version
-		const legacyValue = await this._secretStorage.get(this._legacyKey);
-		if (legacyValue) {
-			// Update the new store with the legacy value
-			const parsedValue = JSON.parse(legacyValue);
-			await this._secretStorage.store(this._key, legacyValue);
-			return parsedValue;
-		}
 		return undefined;
 	}
 
 	async store(value: string[]): Promise<void> {
-		const stringified = JSON.stringify(value);
-		// TODO@TylerLeonhardt: Remove legacy storage in next version
-		await Promise.all([
-			this._secretStorage.store(this._key, stringified),
-			this._secretStorage.store(this._legacyKey, stringified)
-		]);
+		await this._secretStorage.store(this._key, JSON.stringify(value));
 	}
 
 	async delete(): Promise<void> {
-		// TODO@TylerLeonhardt: Remove legacy deletion in next version
-		await Promise.all([
-			this._secretStorage.delete(this._key),
-			this._secretStorage.delete(this._legacyKey)
-		]);
+		await this._secretStorage.delete(this._key);
 	}
 
 	dispose() {
