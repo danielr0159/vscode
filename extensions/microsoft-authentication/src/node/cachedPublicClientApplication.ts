@@ -135,6 +135,9 @@ export class CachedPublicClientApplication implements ICachedPublicClientApplica
 			}
 		}
 
+		if (!result.account) {
+			this._logger.error(`[acquireTokenSilent] [${this._clientId}] [${request.authority}] [${request.scopes.join(' ')}] [${request.account.username}] no account found in result`);
+		}
 		if (result.account && !result.fromCache && this._verifyIfUsingBroker(result)) {
 			this._logger.debug(`[acquireTokenSilent] [${this._clientId}] [${request.authority}] [${request.scopes.join(' ')}] [${request.account.username}] firing event due to change`);
 			this._onDidAccountsChangeEmitter.fire({ added: [], changed: [result.account], deleted: [] });
@@ -208,7 +211,11 @@ export class CachedPublicClientApplication implements ICachedPublicClientApplica
 		if (!result.fromNativeBroker) {
 			return true;
 		}
-		const key = result.account!.homeAccountId;
+		let key = result.account!.nativeAccountId;
+		if (!key) {
+			this._logger.error(`[verifyIfUsingBroker] [${this._clientId}] [${result.account!.username}] no nativeAccountId found. Using homeAccountId instead.`);
+			key = result.account!.homeAccountId;
+		}
 		const lastSeen = this._lastSeen.get(key);
 		const lastTimeAuthed = result.account!.idTokenClaims!.iat!;
 		if (!lastSeen) {
