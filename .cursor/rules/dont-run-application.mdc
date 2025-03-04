@@ -1,0 +1,6 @@
+---
+description: Dont run the application
+globs: 
+alwaysApply: false
+---
+Whenever we want to run our local VSCode fork, you shouldn't run it in the composer. Instead, I will run it in an external terminal.
