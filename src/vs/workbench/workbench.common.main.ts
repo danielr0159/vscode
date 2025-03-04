@@ -192,6 +192,9 @@ import './contrib/speech/browser/speech.contribution.js';
 import './contrib/chat/browser/chat.contribution.js';
 import './contrib/inlineChat/browser/inlineChat.contribution.js';
 
+// Ask
+import './contrib/ask/browser/ask.contribution.js';
+
 // Interactive
 import './contrib/interactive/browser/interactive.contribution.js';
 
@@ -398,6 +401,5 @@ import './contrib/inlineCompletions/browser/inlineCompletions.contribution.js';
 // Drop or paste into
 import './contrib/dropOrPasteInto/browser/dropOrPasteInto.contribution.js';
 import { AllowedExtensionsService } from '../platform/extensionManagement/common/allowedExtensionsService.js';
-
 
 //#endregion

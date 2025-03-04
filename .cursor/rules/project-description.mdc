@@ -1,0 +1,6 @@
+---
+description: Understand the scope of our project
+globs: 
+alwaysApply: false
+---
+We're a fork of VScode. We're personalizing the IDE for our needs. We're going to add certain features to the base VScode.

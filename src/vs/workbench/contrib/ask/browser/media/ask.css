@@ -1,0 +1,75 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.ask-widget {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	overflow: hidden;
+	padding: 10px;
+}
+
+.ask-messages {
+	flex: 1;
+	overflow-y: auto;
+	margin-bottom: 10px;
+	padding: 5px;
+}
+
+.ask-message {
+	margin-bottom: 10px;
+	padding: 8px 12px;
+	border-radius: 6px;
+	max-width: 80%;
+	word-wrap: break-word;
+}
+
+.ask-message.user {
+	align-self: flex-end;
+	margin-left: auto;
+	background-color: var(--vscode-button-background);
+	color: var(--vscode-button-foreground);
+}
+
+.ask-message.response {
+	align-self: flex-start;
+	background-color: var(--vscode-editor-background);
+	color: var(--vscode-editor-foreground);
+	border: 1px solid var(--vscode-widget-border);
+}
+
+.ask-message-content {
+	white-space: pre-wrap;
+}
+
+.ask-input-container {
+	display: flex;
+	align-items: flex-end;
+	gap: 8px;
+	padding: 5px;
+	border-top: 1px solid var(--vscode-widget-border);
+}
+
+.ask-input {
+	flex: 1;
+	resize: none;
+	border: 1px solid var(--vscode-input-border);
+	background-color: var(--vscode-input-background);
+	color: var(--vscode-input-foreground);
+	border-radius: 4px;
+	padding: 8px;
+	font-family: var(--monaco-monospace-font);
+	min-height: 20px;
+	max-height: 150px;
+	outline: none;
+}
+
+.ask-input:focus {
+	border-color: var(--vscode-focusBorder);
+}
+
+.ask-send-button {
+	margin-bottom: 2px;
+}
