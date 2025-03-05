@@ -9,6 +9,7 @@ import { $, append, addDisposableListener } from '../../../../base/browser/dom.j
 import { Button } from '../../../../base/browser/ui/button/button.js';
 import { defaultButtonStyles } from '../../../../platform/theme/browser/defaultStyles.js';
 import { localize } from '../../../../nls.js';
+import { IWPBackendService } from '../../../../platform/wp-backend/common/wp-backend.js';
 
 export interface IAskWidgetStyles {
 	listForeground: string;
@@ -49,6 +50,7 @@ export class AskWidget extends Disposable {
 
 	constructor(
 		private readonly styles: IAskWidgetStyles,
+		@IWPBackendService private readonly wpBackendService: IWPBackendService
 	) {
 		super();
 	}
@@ -153,9 +155,22 @@ export class AskWidget extends Disposable {
 
 		this._onDidChangeHeight.fire(this.container.offsetHeight);
 
-		// Simulate response (in a real implementation, this would call a service)
-		setTimeout(() => {
-			answerContainer.textContent = this.hardcodedResponse;
+		// Query the WP backend service
+		this.wpBackendService.query(content).then(response => {
+			answerContainer.textContent = response;
+			entry.answer = response;
+
+			// Create a new input box AFTER the answer is shown
+			setTimeout(() => {
+				this.createNewInputBox();
+
+				// Scroll to the bottom to show the new input box
+				this.chatHistoryContainer.scrollTop = this.chatHistoryContainer.scrollHeight;
+				this._onDidChangeHeight.fire(this.container.offsetHeight);
+			}, 100);
+		}).catch(error => {
+			// Fallback to hardcoded response in case of error
+			answerContainer.textContent = `Error: ${error.message || 'Unknown error'}. Fallback: ${this.hardcodedResponse}`;
 			entry.answer = this.hardcodedResponse;
 
 			// Create a new input box AFTER the answer is shown
@@ -166,7 +181,7 @@ export class AskWidget extends Disposable {
 				this.chatHistoryContainer.scrollTop = this.chatHistoryContainer.scrollHeight;
 				this._onDidChangeHeight.fire(this.container.offsetHeight);
 			}, 100);
-		}, 500);
+		});
 	}
 
 	private optimizeQuestionBox(entry: IConversationEntry): void {

@@ -120,6 +120,9 @@ import { getCodeDisplayProtocol, getDisplayProtocol } from '../../../base/node/o
 import { RequestService } from '../../../platform/request/electron-utility/requestService.js';
 import { DefaultExtensionsInitializer } from './contrib/defaultExtensionsInitializer.js';
 import { AllowedExtensionsService } from '../../../platform/extensionManagement/common/allowedExtensionsService.js';
+import { IWPBackendService } from '../../../platform/wp-backend/common/wp-backend.js';
+import { WPBackendService } from '../../../platform/wp-backend/node/wp-backendService.js';
+import { WPBackendChannel } from '../../../platform/wp-backend/common/wp-backendIpc.js';
 
 class SharedProcessMain extends Disposable implements IClientConnectionFilter {
 
@@ -371,6 +374,9 @@ class SharedProcessMain extends Disposable implements IClientConnectionFilter {
 		// Remote Tunnel
 		services.set(IRemoteTunnelService, new SyncDescriptor(RemoteTunnelService));
 
+		// WP Backend
+		services.set(IWPBackendService, new SyncDescriptor(WPBackendService));
+
 		return new InstantiationService(services);
 	}
 
@@ -431,6 +437,10 @@ class SharedProcessMain extends Disposable implements IClientConnectionFilter {
 		// Remote Tunnel
 		const remoteTunnelChannel = ProxyChannel.fromService(accessor.get(IRemoteTunnelService), this._store);
 		this.server.registerChannel('remoteTunnel', remoteTunnelChannel);
+
+		// WP Backend
+		const wpBackendService = accessor.get(IWPBackendService);
+		this.server.registerChannel('wp-backend', new WPBackendChannel(wpBackendService));
 	}
 
 	private registerErrorHandler(logService: ILogService): void {

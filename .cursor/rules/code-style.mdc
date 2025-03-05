@@ -3,5 +3,6 @@ description: code style guide
 globs: 
 alwaysApply: false
 ---
-always use relative imports
-make sure to remove any unused vairables or imports that you might accidentally add
+1. always use relative imports
+2. make sure to remove any unused vairables or imports that you might accidentally ad
+3. DO NOT add " *  Copyright (c) Microsoft Corporation. All rights reserved." to the top of each file

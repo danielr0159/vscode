@@ -91,6 +91,8 @@ import { SyncDescriptor } from '../platform/instantiation/common/descriptors.js'
 
 registerSingleton(IUserDataInitializationService, new SyncDescriptor(UserDataInitializationService, [[]], true));
 
+// WP Backend
+import '../platform/wp-backend/electron-sandbox/wp-backendService.js';
 
 //#endregion
 
