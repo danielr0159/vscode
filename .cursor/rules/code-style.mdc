@@ -1,0 +1,7 @@
+---
+description: code style guide
+globs: 
+alwaysApply: false
+---
+always use relative imports
+make sure to remove any unused vairables or imports that you might accidentally add

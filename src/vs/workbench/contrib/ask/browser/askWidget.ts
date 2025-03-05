@@ -5,7 +5,7 @@
 
 import { Disposable } from '../../../../base/common/lifecycle.js';
 import { Emitter, Event } from '../../../../base/common/event.js';
-import { $, append, clearNode, addDisposableListener } from '../../../../base/browser/dom.js';
+import { $, append, addDisposableListener } from '../../../../base/browser/dom.js';
 import { Button } from '../../../../base/browser/ui/button/button.js';
 import { defaultButtonStyles } from '../../../../platform/theme/browser/defaultStyles.js';
 import { localize } from '../../../../nls.js';
@@ -185,7 +185,6 @@ export class AskWidget extends Disposable {
 		const originalBgColor = inputBox.style.backgroundColor;
 
 		// Temporarily remove min-height to get accurate scrollHeight
-		const originalMinHeight = inputBox.style.minHeight;
 		inputBox.style.minHeight = 'unset';
 
 		// Set height to auto and then to scrollHeight to fit content exactly
@@ -327,24 +326,6 @@ export class AskWidget extends Disposable {
 		return color;
 	}
 
-	// Helper function to darken a color
-	private darkenColor(color: string, amount: number): string {
-		// Simple implementation for hex colors
-		if (color.startsWith('#')) {
-			let r = parseInt(color.slice(1, 3), 16);
-			let g = parseInt(color.slice(3, 5), 16);
-			let b = parseInt(color.slice(5, 7), 16);
-
-			r = Math.max(0, Math.round(r * (1 - amount)));
-			g = Math.max(0, Math.round(g * (1 - amount)));
-			b = Math.max(0, Math.round(b * (1 - amount)));
-
-			return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
-		}
-
-		// For non-hex colors, just return the original
-		return color;
-	}
 
 	layout(height: number, width: number): void {
 		if (this.container) {

@@ -14,7 +14,7 @@
 		},
 		"node_modules": true,
 		"out": true,
-		".cursor": true,
+		// ".cursor": true,
 		"package-lock.json": true,
 		".github": true,
 		".devcontainer": true,
