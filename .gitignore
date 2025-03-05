@@ -21,3 +21,6 @@ vscode.db
 product.overrides.json
 *.snap.actual
 .vscode-test
+
+# Claude API configuration
+src/vs/platform/wp-backend/node/claude-config.ts
